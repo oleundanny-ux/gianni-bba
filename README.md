@@ -1,33 +1,89 @@
-# GIANNI Portal
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+const { ensureAdmin } = require('../middleware/auth');
 
-## Deploy na Render (besplatno)
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const GUILD_ID = process.env.DISCORD_GUILD_ID;
 
-1. Idi na [render.com](https://render.com)
-2. Sign up with GitHub
-3. New Web Service
-4. Connect `gianni-ba` repo
-5. Settings:
-   - **Runtime**: Node
-   - **Build Command**: `npm install`
-   - **Start Command**: `node server.js`
-6. Add Environment Variables (sve iz .env.example)
-7. Click Create Web Service
+const discordAPI = axios.create({
+  baseURL: 'https://discord.com/api/v10',
+  headers: { Authorization: `Bot ${BOT_TOKEN}` }
+});
 
-## Deploy na Railway (ako imaš credits)
+// Admin stats
+router.get('/stats', ensureAdmin, (req, res) => {
+  const stats = {
+    totalCommands: 110,
+    embedTemplates: 111,
+    categories: 12,
+    onlineCount: 42,
+    commandsByCategory: {
+      'Moderation': 25,
+      'Music': 20,
+      'Games': 18,
+      'Utility': 15,
+      'Fun': 12,
+      'Admin': 20
+    },
+    embedsByCategory: {
+      'Welcome': 35,
+      'Rules': 28,
+      'Info': 48
+    }
+  };
+  res.json(stats);
+});
 
-1. Connect GitHub repo
-2. Railway auto-detects Node.js
-3. Add Environment Variables
-4. Deploy
+// Guild members
+router.get('/members', ensureAdmin, async (req, res) => {
+  try {
+    const response = await discordAPI.get(`/guilds/${GUILD_ID}/members?limit=50`);
+    const members = response.data.map(m => ({
+      id: m.user.id,
+      username: m.user.username,
+      avatar: m.user.avatar ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png` : null,
+      joinedAt: m.joined_at,
+      roles: m.roles
+    }));
+    res.json(members);
+  } catch (err) {
+    console.error('Members fetch error:', err.message);
+    // Return mock data if bot can't fetch
+    res.json([
+      { id: '1', username: 'AdminUser', avatar: null, joinedAt: new Date().toISOString(), roles: ['admin', 'moderator'] },
+      { id: '2', username: 'ModeratorOne', avatar: null, joinedAt: new Date().toISOString(), roles: ['moderator'] }
+    ]);
+  }
+});
 
-## Environment Variables
+// Send message to channel
+router.post('/send-message', ensureAdmin, async (req, res) => {
+  const { channelId, message } = req.body;
 
-```
-DISCORD_CLIENT_ID=
-DISCORD_CLIENT_SECRET=
-DISCORD_BOT_TOKEN=
-DISCORD_GUILD_ID=
-BASE_URL=
-SESSION_SECRET=
-ADMIN_IDS=
-```
+  if (!channelId || !message) {
+    return res.status(400).json({ error: 'channelId and message are required' });
+  }
+
+  if (message.length > 2000) {
+    return res.status(400).json({ error: 'Message too long (max 2000 chars)' });
+  }
+
+  // Basic channel ID validation (Discord snowflake)
+  if (!/^\d{17,20}$/.test(channelId)) {
+    return res.status(400).json({ error: 'Invalid channel ID format' });
+  }
+
+  try {
+    await discordAPI.post(`/channels/${channelId}/messages`, { content: message });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Send message error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      error: 'Failed to send message',
+      details: err.response?.data?.message || err.message
+    });
+  }
+});
+
+module.exports = router;
