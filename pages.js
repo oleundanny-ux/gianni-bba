@@ -3,89 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Games — GIANNI</title>
+  <title>Music — GIANNI</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    .gaming-zone-title {
-      font-size: 2.5rem;
-      font-weight: 900;
-      text-align: center;
-      padding: 3rem 0 2rem;
-      text-shadow: 0 0 30px rgba(255,255,255,0.1);
-    }
-    .games-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+    .music-player {
       max-width: 900px;
-      margin: 0 auto;
-    }
-    .game-card {
+      margin: 2rem auto;
+      background: linear-gradient(135deg, #0d1a2a, #0d0d1a);
+      border: 1px solid rgba(59,130,246,0.3);
       border-radius: 20px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 2rem;
+    }
+    .player-header { text-align:center; margin-bottom: 2rem; }
+    .player-header h2 { font-size:1.2rem; font-weight:700; }
+    .player-header p { color: var(--text-muted); font-size:0.875rem; }
+    .disc-wrapper {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 2rem;
       position: relative;
     }
-    .game-card:hover { transform: translateY(-6px); }
-    .game-card-among {
-      background: #1a0505;
-      border: 2px solid #ef4444;
-      box-shadow: 0 0 20px rgba(239,68,68,0.3);
-    }
-    .game-card-among:hover { box-shadow: 0 0 40px rgba(239,68,68,0.5); }
-    .game-card-uno {
-      background: #0a1a2a;
-      border: 2px solid #3b82f6;
-      box-shadow: 0 0 20px rgba(59,130,246,0.3);
-    }
-    .game-card-uno:hover { box-shadow: 0 0 40px rgba(59,130,246,0.5); }
-    .game-card-music {
-      background: #0a1a0a;
-      border: 2px solid #10b981;
-      box-shadow: 0 0 20px rgba(16,185,129,0.3);
-    }
-    .game-card-music:hover { box-shadow: 0 0 40px rgba(16,185,129,0.5); }
-    .game-inner {
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      min-height: 280px;
+    .disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #6366f1, #0f172a);
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      animation: spinDisc 4s linear infinite paused;
+      font-size: 4rem;
+      box-shadow: 0 0 40px rgba(99,102,241,0.4);
     }
-    .game-emoji { font-size: 5rem; margin-bottom: 0.5rem; }
-    .game-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .game-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem; }
-    .game-btn {
-      padding: 0.65rem 2rem;
-      border-radius: 50px;
-      font-size: 0.875rem;
-      font-weight: 700;
+    .disc.playing { animation-play-state: running; }
+    @keyframes spinDisc { to { transform: rotate(360deg); } }
+    .track-info { text-align:center; margin-bottom: 1.5rem; }
+    .track-title { font-size:1.1rem; font-weight:700; }
+    .track-artist { color: var(--text-muted); font-size:0.875rem; }
+    .progress-section { margin-bottom: 1.5rem; }
+    .time-row { display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem; }
+    .progress-interactive {
+      height: 6px;
+      background: var(--bg-card2);
+      border-radius: 3px;
       cursor: pointer;
+      position: relative;
+    }
+    .progress-interactive-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .controls { display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-bottom:1.5rem; }
+    .ctrl-btn {
+      background: none;
       border: none;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-block;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0.4rem;
     }
-    .btn-among { background: #ef4444; color: white; }
-    .btn-among:hover { background: #dc2626; }
-    .btn-uno { background: #3b82f6; color: white; }
-    .btn-uno:hover { background: #2563eb; }
-    .btn-music-game { background: #10b981; color: white; }
-    .btn-music-game:hover { background: #059669; }
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .ctrl-btn:hover { color: var(--text); }
+    .play-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(99,102,241,0.4);
+      transition: transform 0.2s;
+    }
+    .play-btn:hover { transform: scale(1.08); }
+    .volume-row { display:flex; align-items:center; gap:0.75rem; }
+    .volume-slider { flex:1; height:4px; -webkit-appearance:none; appearance:none; background:var(--bg-card2); border-radius:2px; outline:none; }
+    .volume-slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#3b82f6; cursor:pointer; }
+    .playlist {
+      margin-top: 2rem;
+      background: var(--bg-card2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .playlist-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .playlist-item {
+      display: flex;
+      align-items: center;
       gap: 1rem;
-      max-width: 900px;
-      margin: 3rem auto 0;
+      padding: 0.875rem 1.25rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
-    @media (max-width: 768px) {
-      .games-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-    }
+    .playlist-item:hover { background: var(--bg-card); }
+    .playlist-item.active { background: rgba(99,102,241,0.1); }
+    .playlist-disc { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#3b82f6); display:flex; align-items:center;justify-content:center; font-size:1rem; }
+    .playlist-name { flex:1; font-size:0.875rem; font-weight:500; }
+    .playlist-duration { font-size:0.75rem; color:var(--text-muted); }
+    .waveform { display:flex; align-items:flex-end; gap:2px; height:40px; margin:1rem 0; }
+    .wave-bar { width:4px; border-radius:2px; background: linear-gradient(180deg, #3b82f6, #6366f1); transition: height 0.3s; }
   </style>
 </head>
 <body>
@@ -105,78 +133,212 @@
   </nav>
 
   <div class="page">
-    <div class="container">
-      <div class="gaming-zone-title">🎮 Gaming Zone</div>
+    <div class="container section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.5rem;font-weight:800;">🎵 GIANNI Music Player</h2>
+        <button class="btn btn-outline btn-sm" onclick="savePlaylist()">💾 Save Playlist</button>
+      </div>
 
-      <div class="games-grid">
-        <div class="game-card game-card-among">
-          <div class="game-inner">
-            <div>
-              <div class="game-emoji">🔴</div>
-              <div class="game-name">Among Us</div>
-              <div class="game-desc">Find the impostor. Play with friends right inside Discord!</div>
-            </div>
-            <button class="game-btn btn-among" onclick="launchGame('among-us')">Launch Game</button>
+      <div class="music-player">
+        <div class="player-header">
+          <h2 id="track-title">No track playing</h2>
+          <p id="track-artist">Select a song from the playlist</p>
+        </div>
+
+        <div class="disc-wrapper">
+          <div class="disc" id="disc">💿</div>
+        </div>
+
+        <div class="progress-section">
+          <div class="time-row">
+            <span id="time-current">0:00</span>
+            <span id="time-total">0:00</span>
+          </div>
+          <div class="progress-interactive" id="progress-bar" onclick="seekTrack(event)">
+            <div class="progress-interactive-fill" id="progress-fill" style="width:0%"></div>
           </div>
         </div>
 
-        <div class="game-card game-card-uno">
-          <div class="game-inner">
-            <div>
-              <div class="game-emoji">🃏</div>
-              <div class="game-name">UNO</div>
-              <div class="game-desc">Classic card game. Up to 10 players per session.</div>
-            </div>
-            <button class="game-btn btn-uno" onclick="launchGame('uno')">Play UNO</button>
-          </div>
+        <div class="waveform" id="waveform"></div>
+
+        <div class="controls">
+          <button class="ctrl-btn" id="btn-shuffle" onclick="toggleShuffle()" title="Shuffle">🔀</button>
+          <button class="ctrl-btn" onclick="prevTrack()" title="Previous">⏮</button>
+          <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+          <button class="ctrl-btn" onclick="nextTrack()" title="Next">⏭</button>
+          <button class="ctrl-btn" id="btn-repeat" onclick="toggleRepeat()" title="Repeat">🔁</button>
         </div>
 
-        <div class="game-card game-card-music">
-          <div class="game-inner">
-            <div>
-              <div style="font-size:5rem;">💿</div>
-              <div class="game-name">Music Player</div>
-              <div class="game-desc">Stream music in your Discord voice channel.</div>
-            </div>
-            <a href="/music" class="game-btn btn-music-game">Open Player</a>
-          </div>
+        <div class="volume-row">
+          <span>🔊</span>
+          <input type="range" class="volume-slider" id="volume" min="0" max="100" value="70" oninput="setVolume(this.value)">
+          <span id="volume-val" style="font-size:0.75rem;color:var(--text-muted);min-width:28px;">70%</span>
         </div>
       </div>
 
-      <div class="stats-row" id="game-stats">
-        <div class="stat-card">
-          <div class="stat-value" id="games-played">-</div>
-          <div class="stat-label">Your Games</div>
+      <div class="playlist">
+        <div class="playlist-header">
+          <span style="font-weight:700;">Queue</span>
+          <span style="font-size:0.8rem;color:var(--text-muted);" id="queue-count">0 songs</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">🏆</div>
-          <div class="stat-label">Achievements</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="user-xp">-</div>
-          <div class="stat-label">XP Points</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="user-level-g">-</div>
-          <div class="stat-label">Level</div>
-        </div>
+        <div id="playlist-items"></div>
       </div>
     </div>
   </div>
 
   <script src="/js/main.js"></script>
   <script>
-    function launchGame(game) {
-      const names = { 'among-us': 'Among Us', 'uno': 'UNO' };
-      showToast(`Launching ${names[game]}... Connect to a Discord voice channel first!`, 'info');
+    const TRACKS = [
+      { id: 1, title: 'Chill Vibes', artist: 'Lo-Fi Artist', duration: '3:24', emoji: '🎵' },
+      { id: 2, title: 'Night Drive', artist: 'Synth Wave', duration: '4:12', emoji: '🌙' },
+      { id: 3, title: 'Gaming Time', artist: 'Electronic', duration: '2:58', emoji: '🎮' },
+      { id: 4, title: 'Smooth Jazz', artist: 'Jazz Collective', duration: '5:01', emoji: '🎷' },
+      { id: 5, title: 'Epic Boss Fight', artist: 'OST Master', duration: '3:45', emoji: '⚔️' },
+    ];
+
+    let currentTrack = 0;
+    let isPlaying = false;
+    let shuffle = false;
+    let repeat = false;
+    let progress = 0;
+    let progressInterval = null;
+    let waveInterval = null;
+
+    function renderPlaylist() {
+      const container = document.getElementById('playlist-items');
+      document.getElementById('queue-count').textContent = `${TRACKS.length} songs`;
+      container.innerHTML = '';
+
+      TRACKS.forEach((t, i) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item ${i === currentTrack ? 'active' : ''}`;
+        item.onclick = () => selectTrack(i);
+        item.innerHTML = `
+          <div class="playlist-disc">${t.emoji}</div>
+          <div class="playlist-name">${escapeHtml(t.title)}<br><span style="color:var(--text-muted);font-size:0.75rem;">${escapeHtml(t.artist)}</span></div>
+          <div class="playlist-duration">${t.duration}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function selectTrack(idx) {
+      currentTrack = idx;
+      progress = 0;
+      updateTrackInfo();
+      renderPlaylist();
+      if (isPlaying) startProgress();
+    }
+
+    function updateTrackInfo() {
+      const t = TRACKS[currentTrack];
+      document.getElementById('track-title').textContent = t.title;
+      document.getElementById('track-artist').textContent = t.artist;
+      document.getElementById('time-total').textContent = t.duration;
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      document.getElementById('play-btn').textContent = isPlaying ? '⏸' : '▶';
+      document.getElementById('disc').classList.toggle('playing', isPlaying);
+      if (isPlaying) startProgress(); else stopProgress();
+      animateWaveform();
+    }
+
+    function startProgress() {
+      stopProgress();
+      const parts = TRACKS[currentTrack].duration.split(':');
+      const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      progressInterval = setInterval(() => {
+        progress = Math.min(progress + (100 / totalSec), 100);
+        document.getElementById('progress-fill').style.width = progress + '%';
+        const elapsed = Math.floor((progress / 100) * totalSec);
+        document.getElementById('time-current').textContent = `${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`;
+        if (progress >= 100) { nextTrack(); }
+      }, 1000);
+    }
+
+    function stopProgress() {
+      if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+    }
+
+    function nextTrack() {
+      currentTrack = shuffle
+        ? Math.floor(Math.random() * TRACKS.length)
+        : (currentTrack + 1) % TRACKS.length;
+      progress = 0;
+      updateTrackInfo();
+      renderPlaylist();
+      if (isPlaying) startProgress();
+    }
+
+    function prevTrack() {
+      currentTrack = (currentTrack - 1 + TRACKS.length) % TRACKS.length;
+      progress = 0;
+      updateTrackInfo();
+      renderPlaylist();
+      if (isPlaying) startProgress();
+    }
+
+    function seekTrack(e) {
+      const bar = document.getElementById('progress-bar');
+      const rect = bar.getBoundingClientRect();
+      progress = ((e.clientX - rect.left) / rect.width) * 100;
+      document.getElementById('progress-fill').style.width = progress + '%';
+    }
+
+    function toggleShuffle() {
+      shuffle = !shuffle;
+      document.getElementById('btn-shuffle').style.color = shuffle ? '#3b82f6' : '';
+      showToast(shuffle ? 'Shuffle ON' : 'Shuffle OFF');
+    }
+
+    function toggleRepeat() {
+      repeat = !repeat;
+      document.getElementById('btn-repeat').style.color = repeat ? '#3b82f6' : '';
+      showToast(repeat ? 'Repeat ON' : 'Repeat OFF');
+    }
+
+    function setVolume(v) {
+      document.getElementById('volume-val').textContent = v + '%';
+    }
+
+    function savePlaylist() {
+      showToast('Playlist saved!', 'success');
+    }
+
+    function buildWaveform() {
+      const wf = document.getElementById('waveform');
+      wf.innerHTML = '';
+      for (let i = 0; i < 32; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'wave-bar';
+        bar.style.height = '4px';
+        bar.style.flex = '1';
+        wf.appendChild(bar);
+      }
+    }
+
+    function animateWaveform() {
+      if (waveInterval) { clearInterval(waveInterval); waveInterval = null; }
+      if (!isPlaying) {
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.height = '4px');
+        return;
+      }
+      waveInterval = setInterval(() => {
+        if (!isPlaying) return;
+        document.querySelectorAll('.wave-bar').forEach(b => {
+          b.style.height = (Math.random() * 32 + 4) + 'px';
+        });
+      }, 150);
     }
 
     async function init() {
       const user = await initUser();
       if (!user) { window.location.href = '/login'; return; }
-      document.getElementById('games-played').textContent = user.stats.gamesPlayed;
-      document.getElementById('user-xp').textContent = formatNumber(user.stats.xpPoints);
-      document.getElementById('user-level-g').textContent = `Lv.${user.stats.level}`;
+      buildWaveform();
+      updateTrackInfo();
+      renderPlaylist();
     }
     init();
   </script>
