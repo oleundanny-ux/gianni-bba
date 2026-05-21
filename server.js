@@ -1,3 +1,4 @@
+cat > /app/server.js << 'EOF'
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
@@ -22,14 +23,7 @@ passport.use(new DiscordStrategy({
     email: profile.email,
     guilds: profile.guilds || [],
     isAdmin: ADMIN_IDS.includes(profile.id),
-    stats: {
-      gamesPlayed: Math.floor(Math.random() * 50),
-      musicHours: Math.floor(Math.random() * 100),
-      xpPoints: Math.floor(Math.random() * 5000),
-      serversAdded: Math.floor(Math.random() * 10),
-      level: Math.floor(Math.random() * 20) + 1,
-      xpProgress: Math.floor(Math.random() * 100)
-    },
+    stats: { gamesPlayed: 0, musicHours: 0, xpPoints: 0, serversAdded: 0, level: 1, xpProgress: 0 },
     recentActivity: []
   };
   users.set(profile.id, user);
@@ -37,14 +31,7 @@ passport.use(new DiscordStrategy({
 }));
 
 passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser((id, done) => {
-  const user = users.get(id);
-  done(null, user || false);
-});
-
-const ensureAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/login');
-const ensureAdmin = (req, res, next) => (req.isAuthenticated() && req.user?.isAdmin) ? next() : res.status(403).send('Access denied');
-const ensureGuest = (req, res, next) => !req.isAuthenticated() ? next() : res.redirect('/dashboard');
+passport.deserializeUser((id, done) => done(null, users.get(id) || false));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,7 +39,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change-me-in-production',
+  secret: process.env.SESSION_SECRET || 'change-me',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
@@ -60,66 +47,40 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static - sve je u root folderu!
+// STATIC FILES - iz root foldera
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 
-// Pages - direktno iz root foldera
-const sendPage = (res, name) => res.sendFile(path.join(__dirname, name + '.html'), err => {
-  if (err) res.status(500).send('Error loading page: ' + name);
-});
+// PAGES
+const sendPage = (res, name) => {
+  const filePath = path.join(__dirname, name + '.html');
+  res.sendFile(filePath, err => {
+    if (err) res.status(500).send('Page error: ' + name);
+  });
+};
 
 app.get('/', (req, res) => sendPage(res, 'index'));
-app.get('/login', ensureGuest, (req, res) => sendPage(res, 'login'));
-app.get('/dashboard', ensureAuth, (req, res) => sendPage(res, 'dashboard'));
-app.get('/games', ensureAuth, (req, res) => sendPage(res, 'games'));
-app.get('/music', ensureAuth, (req, res) => sendPage(res, 'music'));
-app.get('/servers', ensureAuth, (req, res) => sendPage(res, 'servers'));
-app.get('/leaderboards', ensureAuth, (req, res) => sendPage(res, 'leaderboards'));
-app.get('/bot-panel', ensureAdmin, (req, res) => sendPage(res, 'bot-panel'));
+app.get('/login', (req, res) => sendPage(res, 'login'));
+app.get('/dashboard', (req, res) => sendPage(res, 'dashboard'));
+app.get('/games', (req, res) => sendPage(res, 'games'));
+app.get('/music', (req, res) => sendPage(res, 'music'));
+app.get('/servers', (req, res) => sendPage(res, 'servers'));
+app.get('/leaderboards', (req, res) => sendPage(res, 'leaderboards'));
+app.get('/bot-panel', (req, res) => sendPage(res, 'bot-panel'));
 
 app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback', passport.authenticate('discord', { failureRedirect: '/login?error=1' }), (req, res) => res.redirect('/dashboard'));
+app.get('/auth/discord/callback', passport.authenticate('discord', { failureRedirect: '/login' }), (req, res) => res.redirect('/dashboard'));
 app.get('/auth/logout', (req, res) => { req.logout(() => res.redirect('/')); });
 
-app.get('/api/me', ensureAuth, (req, res) => res.json(req.user));
-app.get('/api/guild/info', (req, res) => res.json({ name: 'GIANNI Server', memberCount: 1247, onlineCount: 42, icon: null }));
-app.get('/api/leaderboard', ensureAuth, (req, res) => res.json([
-  { rank: 1, username: 'TopPlayer', xp: 5000, level: 30, trend: 'up' },
-  { rank: 2, username: 'GamingPro', xp: 4200, level: 27, trend: 'up' },
-  { rank: 3, username: 'MusicMaster', xp: 3800, level: 24, trend: 'down' },
-  { rank: 4, username: 'DiscordKing', xp: 3620, level: 22, trend: 'up' },
-  { rank: 5, username: 'BotWhisperer', xp: 3400, level: 21, trend: 'up' }
+app.get('/api/me', (req, res) => req.user ? res.json(req.user) : res.status(401).json({ error: 'Not logged in' }));
+app.get('/api/guild/info', (req, res) => res.json({ name: 'GIANNI Server', memberCount: 1247, onlineCount: 42 }));
+app.get('/api/leaderboard', (req, res) => res.json([{ rank: 1, username: 'TopPlayer', xp: 5000, level: 30 }]));
+app.get('/api/servers', (req, res) => res.json([
+  { id: '1', name: 'Gaming Community', members: 1247, rating: 4.5, category: 'Gaming', active: true, description: 'Premier gaming community.' }
 ]));
-app.get('/api/servers', ensureAuth, (req, res) => {
-  let s = [
-    { id: '1', name: 'Gaming Community Alpha', members: 1247, rating: 4.5, category: 'Gaming', active: true, description: 'Premier gaming community with daily events and tournaments.' },
-    { id: '2', name: 'Music Lovers Hub', members: 892, rating: 4.2, category: 'Music', active: true, description: 'Share and discover music with fellow enthusiasts.' },
-    { id: '3', name: 'Chill & Chat', members: 2103, rating: 3.8, category: 'Community', active: true, description: 'Relaxed community for casual conversation and fun.' },
-    { id: '4', name: 'UNO Masters', members: 456, rating: 4.7, category: 'Gaming', active: true, description: 'Competitive UNO players only. Weekly championship.' },
-    { id: '5', name: 'Lo-Fi Beats', members: 1567, rating: 4.4, category: 'Music', active: true, description: '24/7 lo-fi music and study sessions.' },
-    { id: '6', name: 'Among Us Arena', members: 789, rating: 3.9, category: 'Gaming', active: false, description: 'Among Us games every night. Impostors welcome.' }
-  ];
-  const { category, sort } = req.query;
-  if (category && category !== 'All') s = s.filter(x => x.category === category);
-  if (sort === 'Top Rated') s.sort((a, b) => b.rating - a.rating);
-  else if (sort === 'Newest') s.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-  else s.sort((a, b) => b.members - a.members);
-  res.json(s);
-});
-
-app.get('/admin/stats', ensureAdmin, (req, res) => res.json({ totalCommands: 110, embedTemplates: 111, categories: 12, onlineCount: 42 }));
-app.get('/admin/members', ensureAdmin, (req, res) => res.json([
-  { id: '1', username: 'AdminUser', avatar: null, joinedAt: new Date().toISOString(), roles: ['admin', 'moderator'] },
-  { id: '2', username: 'ModeratorOne', avatar: null, joinedAt: new Date().toISOString(), roles: ['moderator'] }
-]));
-app.post('/admin/send-message', ensureAdmin, (req, res) => {
-  const { channelId, message } = req.body;
-  if (!channelId || !message) return res.status(400).json({ error: 'required' });
-  res.json({ success: true });
-});
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use((req, res) => sendPage(res, '404'));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`GIANNI running on port ${PORT}`));
+EOF
