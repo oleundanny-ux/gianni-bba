@@ -3,17 +3,15 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
-const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const ADMIN_IDS = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
 const users = new Map();
 
-// Passport inline
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: `${process.env.BASE_URL}/auth/discord/callback`,
+  callbackURL: (process.env.BASE_URL || 'http://localhost:3000') + '/auth/discord/callback',
   scope: ['identify', 'email', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
@@ -21,9 +19,7 @@ passport.use(new DiscordStrategy({
       id: profile.id,
       username: profile.username,
       discriminator: profile.discriminator,
-      avatar: profile.avatar
-        ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
-        : `https://cdn.discordapp.com/embed/avatars/${parseInt(profile.discriminator || 0) % 5}.png`,
+      avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
       email: profile.email,
       guilds: profile.guilds || [],
       isAdmin: ADMIN_IDS.includes(profile.id),
@@ -48,25 +44,17 @@ passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
   const user = users.get(id);
   if (user) return done(null, user);
-  done(new Error('User not found'), null);
+  done(null, false);
 });
 
-// Middleware
 const ensureAuth = (req, res, next) => {
   if (req.isAuthenticated()) return next();
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
   res.redirect('/login');
 };
 
 const ensureAdmin = (req, res, next) => {
-  if (req.isAuthenticated() && req.user?.isAdmin) return next();
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.status(403).json({ error: 'Access denied. Admin only.' });
-  }
-  if (req.isAuthenticated()) return res.status(403).send('Access denied');
-  res.redirect('/login');
+  if (req.isAuthenticated() && req.user && req.user.isAdmin) return next();
+  res.status(403).send('Access denied');
 };
 
 const ensureGuest = (req, res, next) => {
@@ -74,12 +62,9 @@ const ensureGuest = (req, res, next) => {
   res.redirect('/dashboard');
 };
 
-// App
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.set('trust proxy', 1);
 
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: 'Too many requests' } }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -87,54 +72,58 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'change-me-in-production',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000 },
-  name: 'gianni.sid'
+  cookie: { secure: false, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
-app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+const publicPath = path.join(__dirname, 'public');
+app.use('/css', express.static(path.join(publicPath, 'css')));
+app.use('/js', express.static(path.join(publicPath, 'js')));
+app.use('/images', express.static(path.join(publicPath, 'images')));
 
-const page = (name) => path.join(__dirname, 'public', 'pages', `${name}.html`);
+const sendPage = (res, name) => {
+  const filePath = path.join(publicPath, 'pages', name + '.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Page error:', err.message);
+      res.status(500).json({ error: 'Page not found: ' + name });
+    }
+  });
+};
 
-// Pages
-app.get('/', (req, res) => res.sendFile(page('index')));
-app.get('/login', ensureGuest, (req, res) => res.sendFile(page('login')));
-app.get('/dashboard', ensureAuth, (req, res) => res.sendFile(page('dashboard')));
-app.get('/games', ensureAuth, (req, res) => res.sendFile(page('games')));
-app.get('/music', ensureAuth, (req, res) => res.sendFile(page('music')));
-app.get('/servers', ensureAuth, (req, res) => res.sendFile(page('servers')));
-app.get('/leaderboards', ensureAuth, (req, res) => res.sendFile(page('leaderboards')));
-app.get('/bot-panel', ensureAdmin, (req, res) => res.sendFile(page('bot-panel')));
+app.get('/', (req, res) => sendPage(res, 'index'));
+app.get('/login', ensureGuest, (req, res) => sendPage(res, 'login'));
+app.get('/dashboard', ensureAuth, (req, res) => sendPage(res, 'dashboard'));
+app.get('/games', ensureAuth, (req, res) => sendPage(res, 'games'));
+app.get('/music', ensureAuth, (req, res) => sendPage(res, 'music'));
+app.get('/servers', ensureAuth, (req, res) => sendPage(res, 'servers'));
+app.get('/leaderboards', ensureAuth, (req, res) => sendPage(res, 'leaderboards'));
+app.get('/bot-panel', ensureAdmin, (req, res) => sendPage(res, 'bot-panel'));
 
-// Auth
 app.get('/auth/discord', passport.authenticate('discord'));
 app.get('/auth/discord/callback', passport.authenticate('discord', { failureRedirect: '/login?error=1' }), (req, res) => res.redirect('/dashboard'));
-app.get('/auth/logout', (req, res) => { req.logout((err) => { if (err) console.error(err); res.redirect('/'); }); });
+app.get('/auth/logout', (req, res) => { req.logout(() => res.redirect('/')); });
 
-// API
 app.get('/api/me', ensureAuth, (req, res) => {
-  const { id, username, discriminator, avatar, email, isAdmin, stats, recentActivity } = req.user;
-  res.json({ id, username, discriminator, avatar, email, isAdmin, stats, recentActivity });
+  const { id, username, avatar, email, isAdmin, stats } = req.user;
+  res.json({ id, username, avatar, email, isAdmin, stats });
 });
 
 app.get('/api/guild/info', (req, res) => res.json({ name: 'GIANNI Server', memberCount: 1247, onlineCount: 42, icon: null }));
 
 app.get('/api/leaderboard', ensureAuth, (req, res) => res.json([
-  { rank: 1, username: 'TopPlayer', avatar: null, xp: 5000, level: 30, trend: 'up' },
-  { rank: 2, username: 'GamingPro', avatar: null, xp: 4200, level: 27, trend: 'up' },
-  { rank: 3, username: 'MusicMaster', avatar: null, xp: 3800, level: 24, trend: 'down' },
-  { rank: 4, username: 'DiscordKing', avatar: null, xp: 3620, level: 22, trend: 'up' },
-  { rank: 5, username: 'BotWhisperer', avatar: null, xp: 3400, level: 21, trend: 'up' },
-  { rank: 6, username: 'NightOwl', avatar: null, xp: 3100, level: 20, trend: 'down' },
-  { rank: 7, username: 'GameHunter', avatar: null, xp: 2900, level: 19, trend: 'up' },
-  { rank: 8, username: 'UNOChamp', avatar: null, xp: 2750, level: 18, trend: 'up' },
-  { rank: 9, username: 'AmongUsFan', avatar: null, xp: 2600, level: 17, trend: 'down' },
-  { rank: 10, username: 'ServerAdmin', avatar: null, xp: 2400, level: 16, trend: 'up' }
+  { rank: 1, username: 'TopPlayer', xp: 5000, level: 30, trend: 'up' },
+  { rank: 2, username: 'GamingPro', xp: 4200, level: 27, trend: 'up' },
+  { rank: 3, username: 'MusicMaster', xp: 3800, level: 24, trend: 'down' },
+  { rank: 4, username: 'DiscordKing', xp: 3620, level: 22, trend: 'up' },
+  { rank: 5, username: 'BotWhisperer', xp: 3400, level: 21, trend: 'up' },
+  { rank: 6, username: 'NightOwl', xp: 3100, level: 20, trend: 'down' },
+  { rank: 7, username: 'GameHunter', xp: 2900, level: 19, trend: 'up' },
+  { rank: 8, username: 'UNOChamp', xp: 2750, level: 18, trend: 'up' },
+  { rank: 9, username: 'AmongUsFan', xp: 2600, level: 17, trend: 'down' },
+  { rank: 10, username: 'ServerAdmin', xp: 2400, level: 16, trend: 'up' }
 ]));
 
 app.get('/api/servers', ensureAuth, (req, res) => {
@@ -154,7 +143,6 @@ app.get('/api/servers', ensureAuth, (req, res) => {
   res.json(servers);
 });
 
-// Admin
 app.get('/admin/stats', ensureAdmin, (req, res) => res.json({ totalCommands: 110, embedTemplates: 111, categories: 12, onlineCount: 42 }));
 app.get('/admin/members', ensureAdmin, (req, res) => res.json([
   { id: '1', username: 'AdminUser', avatar: null, joinedAt: new Date().toISOString(), roles: ['admin', 'moderator'] },
@@ -166,9 +154,7 @@ app.post('/admin/send-message', ensureAdmin, (req, res) => {
   res.json({ success: true });
 });
 
-// Health & 404
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
-app.use((req, res) => res.status(404).sendFile(page('404')));
-app.use((err, req, res, next) => { console.error(err.stack); res.status(500).json({ error: 'Internal server error' }); });
+app.use((req, res) => sendPage(res, '404'));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`GIANNI Portal running on port ${PORT}`));
