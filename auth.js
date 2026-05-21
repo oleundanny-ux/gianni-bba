@@ -1,21 +1,23 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('passport');
-
-router.get('/discord', passport.authenticate('discord'));
-
-router.get('/discord/callback',
-  passport.authenticate('discord', { failureRedirect: '/login?error=1' }),
-  (req, res) => {
-    res.redirect('/dashboard');
+const ensureAuth = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    return res.status(401).json({ error: 'Authentication required' });
   }
-);
+  res.redirect('/login');
+};
 
-router.get('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) console.error(err);
-    res.redirect('/');
-  });
-});
+const ensureAdmin = (req, res, next) => {
+  if (req.isAuthenticated() && req.user && req.user.isAdmin) return next();
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    return res.status(403).json({ error: 'Access denied. Admin only.' });
+  }
+  if (req.isAuthenticated()) return res.status(403).send('Access denied');
+  res.redirect('/login');
+};
 
-module.exports = router;
+const ensureGuest = (req, res, next) => {
+  if (!req.isAuthenticated()) return next();
+  res.redirect('/dashboard');
+};
+
+module.exports = { ensureAuth, ensureAdmin, ensureGuest };
