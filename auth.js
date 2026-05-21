@@ -5,18 +5,16 @@ const passport = require('passport');
 router.get('/discord', passport.authenticate('discord'));
 
 router.get('/discord/callback',
-  passport.authenticate('discord', {
-    failureRedirect: '/login?error=auth_failed',
-    successRedirect: '/dashboard'
-  })
+  passport.authenticate('discord', { failureRedirect: '/login?error=1' }),
+  (req, res) => {
+    res.redirect('/dashboard');
+  }
 );
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', (req, res) => {
   req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy(() => {
-      res.redirect('/');
-    });
+    if (err) console.error(err);
+    res.redirect('/');
   });
 });
 

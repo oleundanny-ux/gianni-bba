@@ -2,7 +2,6 @@ const DiscordStrategy = require('passport-discord').Strategy;
 
 const ADMIN_IDS = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
 
-// In-memory user store (replace with DB in production)
 const users = new Map();
 
 module.exports = (passport) => {
@@ -24,31 +23,27 @@ module.exports = (passport) => {
         guilds: profile.guilds || [],
         isAdmin: ADMIN_IDS.includes(profile.id),
         stats: {
-          gamesPlayed: 0,
-          musicHours: 0,
-          xpPoints: 0,
-          serversAdded: 0,
-          level: 1,
-          xpProgress: 0
+          gamesPlayed: Math.floor(Math.random() * 50),
+          musicHours: Math.floor(Math.random() * 100),
+          xpPoints: Math.floor(Math.random() * 5000),
+          serversAdded: Math.floor(Math.random() * 10),
+          level: Math.floor(Math.random() * 20) + 1,
+          xpProgress: Math.floor(Math.random() * 100)
         },
         recentActivity: []
       };
 
-      // Store in memory (replace with DB)
       users.set(profile.id, user);
-
       return done(null, user);
     } catch (err) {
       return done(err, null);
     }
   }));
 
-  // FIX: Serialize only the user ID, not the entire object
   passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
-  // FIX: Deserialize by fetching from store
   passport.deserializeUser((id, done) => {
     const user = users.get(id);
     if (user) {

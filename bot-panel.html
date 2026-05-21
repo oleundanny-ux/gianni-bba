@@ -5,173 +5,235 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bot Panel — GIANNI</title>
   <link rel="stylesheet" href="/css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <style>
-    .admin-layout { display:grid; grid-template-columns: 220px 1fr; gap:0; min-height:calc(100vh - 64px); }
-    .admin-sidebar {
-      background: #0a0a14;
-      border-right: 1px solid var(--border-light);
-      padding: 1.5rem 1rem;
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .admin-sidebar-title { font-size:0.7rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.75rem; padding:0 0.5rem; }
-    .admin-nav a {
-      display:flex;
-      align-items:center;
-      gap:0.75rem;
-      padding:0.65rem 0.875rem;
-      border-radius:8px;
-      color:var(--text-muted);
-      text-decoration:none;
-      font-size:0.875rem;
-      font-weight:500;
-      margin-bottom:0.2rem;
-      transition:all 0.2s;
+    .admin-header h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
-    .admin-nav a:hover { background:var(--bg-card2); color:var(--text); }
-    .admin-nav a.active { background:rgba(124,58,237,0.2); color:var(--primary-light); }
-    .admin-nav a .dot { width:8px; height:8px; border-radius:50%; }
-    .admin-content { padding: 2rem; }
-    .admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
-    .status-badge { display:flex; align-items:center; gap:0.5rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:50px; padding:0.4rem 1rem; font-size:0.8rem; color:var(--success); font-weight:600; }
-    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
-    .charts-row { display:grid; grid-template-columns:1fr 300px; gap:1.5rem; }
-    .chart-card { background:var(--bg-card); border:1px solid var(--border-light); border-radius:16px; padding:1.5rem; }
-    .chart-title { font-size:0.95rem; font-weight:700; color:var(--primary-light); margin-bottom:1rem; text-align:center; }
-    .send-msg-section { margin-top:1.5rem; background:var(--bg-card); border:1px solid var(--border-light); border-radius:16px; padding:1.5rem; }
-    .form-row { display:flex; gap:0.75rem; }
-    @media (max-width:900px) { .admin-layout { grid-template-columns:1fr; } .admin-sidebar { display:none; } .stats-row { grid-template-columns:repeat(2,1fr); } .charts-row { grid-template-columns:1fr; } }
+    .admin-header h2 svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--success);
+    }
+    .admin-badge {
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1));
+      border: 1px solid rgba(16,185,129,0.3);
+      color: var(--success);
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .admin-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--success);
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .admin-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    .admin-card:hover {
+      border-color: var(--border);
+      transform: translateY(-2px);
+    }
+    .admin-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .admin-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .admin-card-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .admin-card-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .admin-card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+    }
+    .message-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .message-box h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .message-box h3 svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--primary-light);
+    }
+    .members-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .members-table h3 {
+      padding: 1.25rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .members-table h3 svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--primary-light);
+    }
+    @media (max-width: 768px) {
+      .admin-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <nav class="navbar">
-    <a href="/" class="navbar-brand">GIANNI</a>
+    <a href="/" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      GIANNI
+    </a>
     <ul class="navbar-nav">
-      <li><a href="/dashboard">Dashboard</a></li>
-      <li><a href="/bot-panel" class="btn-bot-panel">⚙️ Bot Panel</a></li>
+      <li><a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a></li>
+      <li><a href="/games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="16" cy="13" r="1.5"/><circle cx="19" cy="11" r="1.5"/></svg>Games</a></li>
+      <li><a href="/music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music</a></li>
+      <li><a href="/servers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Servers</a></li>
+      <li><a href="/leaderboards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Leaderboards</a></li>
+      <li id="nav-botpanel" style="display:none;"><a href="/bot-panel" class="btn-bot-panel active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Bot Panel</a></li>
     </ul>
-    <div class="navbar-user" id="navbar-user">
-      <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="mobile-toggle" onclick="toggleMobileNav()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="navbar-user" id="navbar-user">
+        <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
+      </div>
     </div>
   </nav>
 
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+    <a href="/games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="16" cy="13" r="1.5"/><circle cx="19" cy="11" r="1.5"/></svg>Games</a>
+    <a href="/music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music</a>
+    <a href="/servers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Servers</a>
+    <a href="/leaderboards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Leaderboards</a>
+  </div>
+
   <div class="page">
-    <div class="admin-layout">
-      <div class="admin-sidebar">
-        <div class="admin-sidebar-title">Panel</div>
-        <nav class="admin-nav">
-          <a href="#" class="active" onclick="showSection('dashboard',this)"><span class="dot" style="background:var(--success);"></span> Dashboard</a>
-          <a href="#" onclick="showSection('commands',this)"><span class="dot" style="background:var(--blue);"></span> Commands</a>
-          <a href="#" onclick="showSection('embeds',this)"><span class="dot" style="background:var(--primary-light);"></span> Embeds</a>
-          <a href="#" onclick="showSection('members',this)"><span class="dot" style="background:var(--warning);"></span> Members</a>
-          <a href="#" onclick="showSection('server',this)"><span class="dot" style="background:var(--text-muted);"></span> Server</a>
-          <a href="#" onclick="showSection('permissions',this)"><span class="dot" style="background:var(--danger);"></span> Permissions</a>
-          <a href="#" onclick="showSection('protection',this)"><span class="dot" style="background:var(--success);"></span> Protection</a>
-          <a href="#" onclick="showSection('games',this)"><span class="dot" style="background:var(--blue);"></span> Games</a>
-          <a href="#" onclick="showSection('icons',this)"><span class="dot" style="background:var(--warning);"></span> Icons</a>
-          <a href="#" onclick="showSection('emoji',this)"><span class="dot" style="background:var(--primary-light);"></span> Emoji</a>
-          <a href="#" onclick="showSection('settings',this)"><span class="dot" style="background:var(--text-muted);"></span> Settings</a>
-        </nav>
+    <div class="container section">
+      <div class="admin-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Bot Panel
+        </h2>
+        <div class="admin-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Admin Access
+        </div>
       </div>
 
-      <div class="admin-content" id="admin-loading" style="display:flex;align-items:center;justify-content:center;">
-        <div class="spinner"></div>
+      <div class="admin-grid" id="stats-grid">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-icon" style="background:rgba(124,58,237,0.15);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke:var(--primary-light);"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="admin-card-title">Total Commands</div>
+          </div>
+          <div class="admin-card-value" id="total-commands">-</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-icon" style="background:rgba(59,130,246,0.15);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke:var(--blue);"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+            </div>
+            <div class="admin-card-title">Embed Templates</div>
+          </div>
+          <div class="admin-card-value" id="embed-templates">-</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-icon" style="background:rgba(16,185,129,0.15);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke:var(--success);"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="admin-card-title">Online Users</div>
+          </div>
+          <div class="admin-card-value" id="online-users">-</div>
+        </div>
       </div>
-      <div class="admin-content" id="admin-main" style="display:none;">
 
-        <div id="section-dashboard">
-          <div class="admin-header">
-            <div>
-              <h2 style="font-size:1.25rem;font-weight:800;">Admin Dashboard</h2>
-              <p style="color:var(--text-muted);font-size:0.875rem;">Bot control center</p>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:center;">
-              <div class="status-badge">
-                <span class="status-dot status-online"></span>
-                Healthy status
-              </div>
-              <button class="btn btn-primary btn-sm" onclick="refreshStats()">🔄 Refresh</button>
-            </div>
-          </div>
+      <div class="message-box">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Send Message
+        </h3>
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <input type="text" class="form-input" id="channel-id" placeholder="Channel ID">
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <textarea class="form-input" id="message-text" placeholder="Message content..." rows="3" style="resize:vertical;"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Message
+        </button>
+      </div>
 
-          <div class="stats-row">
-            <div class="stat-card">
-              <div class="stat-value" id="stat-commands">-</div>
-              <div class="stat-label">Total Commands</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="stat-embeds">-</div>
-              <div class="stat-label">Embed Templates</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="stat-categories">-</div>
-              <div class="stat-label">Categories</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="stat-members">-</div>
-              <div class="stat-label">Members Online</div>
-            </div>
-          </div>
-
-          <div class="charts-row">
-            <div class="chart-card">
-              <div class="chart-title">Commands by Category</div>
-              <canvas id="commandsChart" height="220"></canvas>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Embed Categories</div>
-              <canvas id="embedsChart" height="220"></canvas>
-            </div>
-          </div>
-
-          <div class="send-msg-section">
-            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;">📨 Send Message to Channel</h3>
-            <div class="form-row">
-              <input type="text" class="form-input" id="channel-id" placeholder="Channel ID" style="max-width:200px;">
-              <input type="text" class="form-input" id="msg-text" placeholder="Message content...">
-              <button class="btn btn-primary" onclick="sendMessage()">Send →</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="section-commands" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">⚡ Commands (110)</h2>
-          <p style="color:var(--text-muted);">Command management panel. Connect your bot database to show real commands.</p>
-        </div>
-        <div id="section-embeds" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">📋 Embed Templates (111)</h2>
-          <p style="color:var(--text-muted);">Manage embed message templates here.</p>
-        </div>
-        <div id="section-members" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">👥 Members</h2>
-          <div id="members-list"><div class="spinner" style="margin:2rem auto;"></div></div>
-        </div>
-        <div id="section-server" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">🌐 Server Settings</h2>
-          <p style="color:var(--text-muted);">Configure server-specific bot behavior.</p>
-        </div>
-        <div id="section-permissions" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">🔐 Permissions</h2>
-          <p style="color:var(--text-muted);">Manage role-based command permissions.</p>
-        </div>
-        <div id="section-protection" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">🛡️ Protection</h2>
-          <p style="color:var(--text-muted);">Anti-spam, auto-mod, and raid protection settings.</p>
-        </div>
-        <div id="section-games" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">🎮 Games Config</h2>
-          <p style="color:var(--text-muted);">Configure game settings, channels, and XP rewards.</p>
-        </div>
-        <div id="section-icons" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">🖼️ Icons</h2>
-          <p style="color:var(--text-muted);">Manage server emoji and icon assets.</p>
-        </div>
-        <div id="section-emoji" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">😀 Emoji</h2>
-          <p style="color:var(--text-muted);">Manage custom emoji for the server.</p>
-        </div>
-        <div id="section-settings" style="display:none;">
-          <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;">⚙️ Settings</h2>
-          <p style="color:var(--text-muted);">Global bot configuration and preferences.</p>
+      <div class="members-table">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Guild Members
+        </h3>
+        <div id="members-list" style="padding:0 1.5rem 1.5rem;">
+          <div class="spinner" style="margin:2rem auto;"></div>
         </div>
       </div>
     </div>
@@ -179,124 +241,65 @@
 
   <script src="/js/main.js"></script>
   <script>
-    let commandsChart, embedsChart;
+    function toggleMobileNav() {
+      document.getElementById('mobile-nav').classList.toggle('show');
+    }
 
-    function showSection(name, el) {
-      document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
-      if (el) el.classList.add('active');
-      document.querySelectorAll('[id^="section-"]').forEach(s => s.style.display = 'none');
-      const sec = document.getElementById(`section-${name}`);
-      if (sec) sec.style.display = 'block';
-      if (name === 'members') loadMembers();
+    async function loadStats() {
+      try {
+        const res = await fetch('/admin/stats');
+        const stats = await res.json();
+        document.getElementById('total-commands').textContent = stats.totalCommands;
+        document.getElementById('embed-templates').textContent = stats.embedTemplates;
+        document.getElementById('online-users').textContent = stats.onlineCount;
+      } catch {
+        showToast('Failed to load stats', 'error');
+      }
     }
 
     async function loadMembers() {
       try {
         const res = await fetch('/admin/members');
         const members = await res.json();
-        const list = document.getElementById('members-list');
-
-        const table = document.createElement('table');
-        table.className = 'table';
-        table.innerHTML = `
-          <thead><tr><th>User</th><th>Joined</th><th>Roles</th></tr></thead>
-          <tbody></tbody>
+        const container = document.getElementById('members-list');
+        if (members.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">No members found.</p>';
+          return;
+        }
+        container.innerHTML = `
+          <table class="table">
+            <thead>
+              <tr><th>User</th><th>ID</th><th>Joined</th><th>Roles</th></tr>
+            </thead>
+            <tbody>
+              ${members.map(m => `
+                <tr>
+                  <td style="display:flex;align-items:center;gap:0.75rem;">
+                    ${m.avatar ? `<img src="${escapeHtml(m.avatar)}" style="width:32px;height:32px;border-radius:8px;" alt="">` : `<div style="width:32px;height:32px;border-radius:8px;background:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;">${escapeHtml(m.username.charAt(0).toUpperCase())}</div>`}
+                    ${escapeHtml(m.username)}
+                  </td>
+                  <td>${escapeHtml(m.id)}</td>
+                  <td>${new Date(m.joinedAt).toLocaleDateString()}</td>
+                  <td>${m.roles.map(r => `<span class="badge badge-primary" style="margin-right:0.25rem;">${escapeHtml(r)}</span>`).join('')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         `;
-
-        const tbody = table.querySelector('tbody');
-        members.forEach(m => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><div style="display:flex;align-items:center;gap:0.5rem;">
-              ${m.avatar ? `<img src="${escapeHtml(m.avatar)}" style="width:28px;height:28px;border-radius:50%;">` : `<div style="width:28px;height:28px;border-radius:50%;background:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${m.username.charAt(0)}</div>`}
-              ${escapeHtml(m.username)}
-            </div></td>
-            <td style="color:var(--text-muted);font-size:0.8rem;">${new Date(m.joinedAt).toLocaleDateString()}</td>
-            <td><span class="badge badge-primary">${m.roles.length} roles</span></td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        list.innerHTML = '';
-        list.appendChild(table);
       } catch {
-        document.getElementById('members-list').innerHTML = '<p style="color:var(--text-muted)">Connect Discord bot to see members.</p>';
-      }
-    }
-
-    async function refreshStats() {
-      await loadStats();
-      showToast('Stats refreshed!', 'success');
-    }
-
-    async function loadStats() {
-      try {
-        const res = await fetch('/admin/stats');
-        const data = await res.json();
-
-        document.getElementById('stat-commands').textContent = data.totalCommands;
-        document.getElementById('stat-embeds').textContent = data.embedTemplates;
-        document.getElementById('stat-categories').textContent = data.categories;
-        document.getElementById('stat-members').textContent = data.onlineCount || 0;
-
-        const catLabels = Object.keys(data.commandsByCategory);
-        const catValues = Object.values(data.commandsByCategory);
-
-        if (commandsChart) commandsChart.destroy();
-        commandsChart = new Chart(document.getElementById('commandsChart'), {
-          type: 'bar',
-          data: {
-            labels: catLabels,
-            datasets: [{
-              data: catValues,
-              backgroundColor: 'rgba(124,58,237,0.6)',
-              borderColor: 'rgba(168,85,247,0.8)',
-              borderWidth: 1,
-              borderRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: '#8888aa', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-              y: { ticks: { color: '#8888aa' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-            }
-          }
-        });
-
-        const embedLabels = Object.keys(data.embedsByCategory);
-        const embedValues = Object.values(data.embedsByCategory);
-
-        if (embedsChart) embedsChart.destroy();
-        embedsChart = new Chart(document.getElementById('embedsChart'), {
-          type: 'doughnut',
-          data: {
-            labels: embedLabels,
-            datasets: [{
-              data: embedValues,
-              backgroundColor: ['rgba(124,58,237,0.7)', 'rgba(99,102,241,0.7)', 'rgba(59,130,246,0.7)'],
-              borderColor: ['#7c3aed', '#6366f1', '#3b82f6'],
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { labels: { color: '#8888aa', font: { size: 11 } } }
-            }
-          }
-        });
-
-      } catch (err) {
-        showToast('Failed to load stats', 'error');
+        document.getElementById('members-list').innerHTML = '<p style="color:var(--text-muted);text-align:center;">Failed to load members.</p>';
       }
     }
 
     async function sendMessage() {
-      const channelId = document.getElementById('channel-id').value.trim();
-      const message = document.getElementById('msg-text').value.trim();
-      if (!channelId || !message) { showToast('Fill in channel ID and message', 'error'); return; }
+      const channelId = document.getElementById('channel-id').value;
+      const message = document.getElementById('message-text').value;
+
+      if (!channelId || !message) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
       try {
         const res = await fetch('/admin/send-message', {
           method: 'POST',
@@ -306,23 +309,21 @@
         const data = await res.json();
         if (data.success) {
           showToast('Message sent!', 'success');
-          document.getElementById('msg-text').value = '';
+          document.getElementById('message-text').value = '';
         } else {
-          showToast(data.error || 'Failed to send', 'error');
+          showToast(data.error || 'Failed to send message', 'error');
         }
       } catch {
-        showToast('Error sending message', 'error');
+        showToast('Failed to send message', 'error');
       }
     }
 
     async function init() {
       const user = await initUser();
       if (!user) { window.location.href = '/login'; return; }
-      if (!user.isAdmin) { window.location.href = '/dashboard'; return; }
-
-      document.getElementById('admin-loading').style.display = 'none';
-      document.getElementById('admin-main').style.display = 'block';
-      await loadStats();
+      if (!user.isAdmin) { window.location.href = '/'; return; }
+      loadStats();
+      loadMembers();
     }
     init();
   </script>

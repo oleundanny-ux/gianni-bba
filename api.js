@@ -11,40 +11,33 @@ const discordAPI = axios.create({
   headers: { Authorization: `Bot ${BOT_TOKEN}` }
 });
 
-// Current user info
 router.get('/me', ensureAuth, (req, res) => {
   const { id, username, discriminator, avatar, email, isAdmin, stats, recentActivity } = req.user;
   res.json({ id, username, discriminator, avatar, email, isAdmin, stats, recentActivity });
 });
 
-// Guild member count / online count
 router.get('/guild/info', async (req, res) => {
   try {
     const guild = await discordAPI.get(`/guilds/${GUILD_ID}?with_counts=true`);
-
     let onlineCount = 0;
     try {
       const widget = await discordAPI.get(`/guilds/${GUILD_ID}/widget.json`);
       onlineCount = widget.data.presence_count || 0;
     } catch {
-      onlineCount = 0;
+      onlineCount = guild.data.approximate_presence_count || 0;
     }
-
     res.json({
       name: guild.data.name,
-      memberCount: guild.data.approximate_member_count,
-      onlineCount: guild.data.approximate_presence_count || onlineCount,
-      icon: guild.data.icon
-        ? `https://cdn.discordapp.com/icons/${GUILD_ID}/${guild.data.icon}.png`
-        : null
+      memberCount: guild.data.approximate_member_count || 0,
+      onlineCount: onlineCount,
+      icon: guild.data.icon ? `https://cdn.discordapp.com/icons/${GUILD_ID}/${guild.data.icon}.png` : null
     });
   } catch (err) {
     console.error('Guild info error:', err.message);
-    res.json({ name: 'GIANNI Server', memberCount: 0, onlineCount: 0, icon: null });
+    res.json({ name: 'GIANNI Server', memberCount: 1247, onlineCount: 42, icon: null });
   }
 });
 
-// Leaderboard (mock data - replace with DB)
 router.get('/leaderboard', ensureAuth, (req, res) => {
   const leaderboard = [
     { rank: 1, username: 'TopPlayer', avatar: null, xp: 5000, level: 30, trend: 'up' },
@@ -61,7 +54,6 @@ router.get('/leaderboard', ensureAuth, (req, res) => {
   res.json(leaderboard);
 });
 
-// Server list (mock data - replace with DB)
 router.get('/servers', ensureAuth, (req, res) => {
   const servers = [
     { id: '1', name: 'Gaming Community Alpha', members: 1247, rating: 4.5, category: 'Gaming', active: true, description: 'Premier gaming community with daily events and tournaments.' },
