@@ -3,135 +3,215 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GIANNI Portal</title>
+  <title>GIANNI — Discord Bot Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin-top: 3rem;
-    }
-    .feature-card {
+    .hero-server-preview {
+      max-width: 500px;
+      margin: 3rem auto 0;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-      transition: all 0.3s;
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
     }
-    .feature-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-4px);
+    .hero-server-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--blue));
     }
-    .feature-icon {
-      font-size: 3rem;
+    .server-preview-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin-bottom: 1rem;
     }
-    .feature-card h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .feature-card p { color: var(--text-muted); font-size: 0.875rem; }
-    .hero-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .widget-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: 16px;
-      padding: 1.5rem;
-      max-width: 420px;
-      margin: 3rem auto 0;
-    }
-    .widget-server {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-    .server-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    .server-preview-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--blue));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 900;
-      font-size: 1.25rem;
     }
-    .channel-list {
-      list-style: none;
-      margin: 0.75rem 0 1.25rem;
-      padding-left: 0.25rem;
-    }
-    .channel-list li {
-      padding: 0.4rem 0;
-      font-size: 0.875rem;
+    .server-preview-icon svg { width: 24px; height: 24px; stroke: white; }
+    .channel-list { list-style: none; }
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
       color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 0.85rem;
+      transition: all 0.2s;
     }
-    .channel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
-    .channel-voice { color: var(--primary-light); }
-    @media (max-width: 768px) {
-      .features-grid { grid-template-columns: 1fr; }
+    .channel-item:hover { background: var(--bg-card2); color: var(--text); }
+    .channel-item svg { width: 16px; height: 16px; stroke: var(--text-muted); flex-shrink: 0; }
+    .channel-item.voice svg { stroke: var(--success); }
+    .stats-preview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-light);
     }
+    .stats-preview-item { text-align: center; }
+    .stats-preview-value { font-size: 1.3rem; font-weight: 800; color: white; }
+    .stats-preview-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; }
+    .cta-section {
+      text-align: center;
+      padding: 4rem 1.5rem;
+      background: linear-gradient(180deg, transparent, rgba(124,58,237,0.05));
+      border-top: 1px solid var(--border-light);
+    }
+    .cta-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem; }
+    .cta-desc { color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem; }
   </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute;">
+    <defs>
+      <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#a855f7"/>
+        <stop offset="100%" style="stop-color:#7c3aed"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
   <nav class="navbar">
-    <a href="/" class="navbar-brand">GIANNI</a>
+    <a href="/" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      GIANNI
+    </a>
     <ul class="navbar-nav">
-      <li><a href="/">Home</a></li>
-      <li><a href="/games">Games</a></li>
-      <li><a href="/music">Music</a></li>
-      <li><a href="/servers">Servers</a></li>
-      <li><a href="/leaderboards">Leaderboards</a></li>
+      <li><a href="/" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a></li>
+      <li><a href="/games">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="16" cy="13" r="1.5"/><circle cx="19" cy="11" r="1.5"/></svg>
+        Games
+      </a></li>
+      <li><a href="/music">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Music
+      </a></li>
+      <li><a href="/servers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Servers
+      </a></li>
+      <li><a href="/leaderboards">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        Leaderboards
+      </a></li>
+      <li id="nav-botpanel" style="display:none;"><a href="/bot-panel" class="btn-bot-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Bot Panel
+      </a></li>
     </ul>
-    <div class="navbar-user" id="navbar-user">
-      <a href="/login" class="btn btn-primary btn-sm">Login</a>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="mobile-toggle" onclick="toggleMobileNav()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="navbar-user" id="navbar-user">
+        <a href="/login" class="btn btn-primary btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Login
+        </a>
+      </div>
     </div>
   </nav>
+
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="/" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="/games">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="16" cy="13" r="1.5"/><circle cx="19" cy="11" r="1.5"/></svg>
+      Games
+    </a>
+    <a href="/music">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Music
+    </a>
+    <a href="/servers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+      Servers
+    </a>
+    <a href="/leaderboards">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      Leaderboards
+    </a>
+  </div>
 
   <div class="page">
     <div class="hero">
       <h1>GIANNI</h1>
       <p>The ultimate Discord bot portal. Play games, stream music, manage your servers — all in one place.</p>
       <div class="hero-buttons">
-        <a href="/auth/discord" class="btn btn-discord">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.081.114 18.104.133 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        <a href="/auth/discord" class="btn btn-primary btn-lg">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.081.114 18.104.133 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
           Continue with Discord
         </a>
-        <a href="/login" class="btn btn-outline">Login with Email</a>
+        <a href="/login" class="btn btn-outline btn-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Login with Email
+        </a>
       </div>
 
-      <div class="widget-card">
-        <div class="widget-server">
-          <div class="server-icon">G</div>
+      <div class="hero-server-preview animate-fade-in">
+        <div class="server-preview-header">
+          <div class="server-preview-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
           <div>
-            <div style="font-weight:700;font-size:1rem;">GIANNI Server</div>
-            <div style="color:var(--success);font-size:0.875rem;"><span data-guild-online>...</span> Online</div>
+            <div style="font-weight:700;font-size:0.95rem;">GIANNI Server</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:0.4rem;">
+              <span class="status-dot status-online"></span>
+              Online
+            </div>
           </div>
         </div>
         <ul class="channel-list">
-          <li><span class="channel-dot"></span> #welcome</li>
-          <li><span class="channel-dot"></span> #general-chat</li>
-          <li><span class="channel-dot"></span> #gaming</li>
-          <li><span style="font-size:1rem;" class="channel-voice">🔊</span> <em>Music</em></li>
+          <li class="channel-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>
+            welcome
+          </li>
+          <li class="channel-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>
+            general-chat
+          </li>
+          <li class="channel-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>
+            gaming
+          </li>
+          <li class="channel-item voice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            Music
+          </li>
         </ul>
-        <div class="divider"></div>
-        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-          <a href="https://discord.gg/your-invite" target="_blank" class="btn btn-discord" style="flex:1;justify-content:center;">
-            Join Discord Server
-          </a>
-          <a href="/login" class="btn btn-outline" style="flex:1;justify-content:center;">Login to Panel</a>
+        <div class="stats-preview">
+          <div class="stats-preview-item">
+            <div class="stats-preview-value" data-guild-members>-</div>
+            <div class="stats-preview-label">Members</div>
+          </div>
+          <div class="stats-preview-item">
+            <div class="stats-preview-value" data-guild-online>-</div>
+            <div class="stats-preview-label">Online</div>
+          </div>
+          <div class="stats-preview-item">
+            <div class="stats-preview-value">99.9%</div>
+            <div class="stats-preview-label">Uptime</div>
+          </div>
         </div>
       </div>
     </div>
@@ -139,40 +219,44 @@
     <div class="container section">
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">🎵</div>
-          <h3>Music Bot</h3>
-          <p>High-quality music streaming, playlists, and advanced audio controls for your server.</p>
+          <div class="feature-icon music">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <div class="feature-title">Music Bot</div>
+          <div class="feature-desc">High-quality music streaming, playlists, and advanced audio controls for your server.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3>Moderation</h3>
-          <p>Powerful tools to keep your community safe, clean, and friendly around the clock.</p>
+          <div class="feature-icon moderation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feature-title">Moderation</div>
+          <div class="feature-desc">Powerful tools to keep your community safe, clean, and friendly around the clock.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎮</div>
-          <h3>Games</h3>
-          <p>Play Among Us, UNO, and more directly through Discord with your friends.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🏆</div>
-          <h3>Leaderboards</h3>
-          <p>Track XP, game stats, and music hours with competitive global rankings.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🌐</div>
-          <h3>Server Browser</h3>
-          <p>Discover and join new Discord communities filtered by category and activity.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚙️</div>
-          <h3>Bot Panel</h3>
-          <p>Full admin dashboard to manage commands, embeds, members, and permissions.</p>
+          <div class="feature-icon games">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="16" cy="13" r="1.5"/><circle cx="19" cy="11" r="1.5"/></svg>
+          </div>
+          <div class="feature-title">Games</div>
+          <div class="feature-desc">Play Among Us, UNO, and more directly through Discord with your friends.</div>
         </div>
       </div>
+    </div>
+
+    <div class="cta-section">
+      <div class="cta-title">Ready to upgrade your server?</div>
+      <p class="cta-desc">Join thousands of Discord communities using GIANNI to enhance their experience.</p>
+      <a href="/auth/discord" class="btn btn-primary btn-lg">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.081.114 18.104.133 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Get Started
+      </a>
     </div>
   </div>
 
   <script src="/js/main.js"></script>
-  <script>initUser();</script>
+  <script>
+    function toggleMobileNav() {
+      document.getElementById('mobile-nav').classList.toggle('show');
+    }
+  </script>
 </body>
 </html>
